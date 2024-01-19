@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Function Response</title>
+</head>
+<body>
+    <h1>Flask Function Response</h1>
+    <input type="text" id="userInput" placeholder="Enter your input">
+    <button id="getDataBtn">Get Data</button>
+    <div id="apiResponse"></div>
+
+    <script>
+        document.getElementById('getDataBtn').addEventListener('click', () => {
+            const userInput = document.getElementById('userInput').value;
+            fetch('/get_data', {
+                method: 'POST',
+                body: new URLSearchParams({ 'userInput': userInput }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('apiResponse').innerHTML = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
