@@ -8,6 +8,9 @@ health_route = "/ping"
 serving_container_ports = [8080]
 container_uri = "gcr.io/gpeg-externalization-platform/keybert-model:0.0.1"
 
+# TO run the model with torchserve
+# torchserve --no-config-snapshots --model-store archived_model/ --start --models all
+
 print('Local Model loading')
 local_model = LocalModel(
     serving_container_image_uri=container_uri,
