@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Frontend</title>
+</head>
+<body>
+    <h1>Performance Max Q & A bot</h1>
+    <div>
+        <input type="text" id="userInput" placeholder="Enter your query">
+        <button id="submitButton">Submit</button>
+    </form>
+    </div>
+    <div>
+        <p>Response: </p>
+        <p id="botResponse"></p>
+    </div>
+
+    <script>
+        // Function to make an API call and get a response
+        function callChatbotAPI(query) {
+            // Replace 'YOUR_API_ENDPOINT' with the actual endpoint of your chatbot API
+            const apiEndpoint = '/get_data';
+
+            // Make an HTTP request to the API
+            fetch(apiEndpoint, {
+                method: 'POST',
+                body: new URLSearchParams({ 'userInput': query }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the response from the chatbot
+                document.getElementById('botResponse').innerText = data.response;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Event listener for the submit button
+        document.getElementById('submitButton').addEventListener('click', function() {
+            const userInput = document.getElementById('userInput').value;
+            console.log(userInput);
+            document.getElementById('botResponse').innerText = "Fetching the response .....";
+            callChatbotAPI(userInput);
+        });
+    </script>
+</body>
+</html>
