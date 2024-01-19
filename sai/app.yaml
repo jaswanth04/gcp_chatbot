@@ -1,0 +1,11 @@
+runtime: python311
+entrypoint: gunicorn -b :8080 -k uvicorn.workers.UvicornWorker main:app
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: 2
+  memory_gb: 1
+  disk_size_gb: 30
+service: smartaitool-dev
+service_account: smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com
