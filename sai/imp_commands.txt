@@ -1,0 +1,140 @@
+
+
+COmmands to push to gcr
+=========================
+docker build -t gcr.io/gpeg-externalization-platform/keybert-model:0.0.1 -f Dockerfile_front_end .
+docker tag gcr.io/gpeg-externalization-platform/rag-frontend:0.0.1
+docker push gcr.io/gpeg-externalization-platform/rag-frontend:0.0.2
+
+docker build -t gcr.io/gpeg-externalization-platform/cloudruntest:0.0.2 .
+docker push gcr.io/gpeg-externalization-platform/cloudruntest:0.0.2
+
+docker build -t gcr.io/gpeg-externalization-platform/keybert-model:0.0.2 .
+docker push gcr.io/gpeg-externalization-platform/keybert-model:0.0.2
+
+# Pushing docker
+=================
+gpeg-externalization-platform
+# Support pushing and pulling "us-docker.pkg.dev" images
+gcloud auth configure-docker us-docker.pkg.dev
+
+gcloud builds submit --tag gcr.io/gpeg-externalization-platform/rag_mvp_backend
+
+
+API KEY 
+=========
+AIzaSyArS8bM8yur4b8rO4uN3tMJy14OU2BhFjA
+
+auth domain
+===========
+gpeg-externalization-platform.firebaseapp.com
+
+Authentication of Cloud Run
+==============================
+First impersonate the service account
+----------------------------------------
+gcloud auth application-default login --impersonate-service-account smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com
+
+save identity token
+---------------------
+gcloud auth print-identity-token > token
+
+set environment variable GOOGLE_APPLICATION_CREDENTIALS with the json file received in impersonation
+------------------------------------------------------------------------------------------------------
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/google/home/jaswantj/.config/gcloud/application_default_credentials.json"
+
+Set token in Authorization header and send the request
+-------------------------------------------------------
+
+Generate an id token with the endpoint
+=========================================
+
+curl -H "Metadata-Flavor: Google" \
+  'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://cloudrun-test-abuwvk2glq-as.a.run.app'
+
+
+Check roles of the service account
+================================
+
+gcloud projects get-iam-policy gpeg-externalization-platform \
+--flatten="bindings[].members" \
+--format='table(bindings.role)' \
+--filter="bindings.members:gdrive2gcs@gpeg-externalization-platform.iam.gserviceaccount.com"
+
+Add roles to the service account
+================================
+
+gcloud projects add-iam-policy-binding gpeg-externalization-platform \
+    --member=serviceAccount:smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com \
+    --role=roles/aiplatform.endpoints.predict
+
+gcloud projects add-iam-policy-binding gpeg-externalization-platform \
+    --member=serviceAccount:cloudrun-test@gpeg-externalization-platform.iam.gserviceaccount.com \
+    --role=roles/aiplatform.user
+
+gcloud projects add-iam-policy-binding gpeg-externalization-platform \
+    --member=serviceAccount:smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com \
+    --role=roles/aiplatform.user
+
+
+gcloud iam service-accounts get-iam-policy smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com
+
+
+gdrive2gcs@gpeg-externalization-platform.iam.gserviceaccount.com
+
+    roles/pubsub.publisher to service-81825140663@gs-project-accounts.iam.gserviceaccount.com
+roles/iam.serviceAccountTokenCreator to service-81825140663@gcp-sa-pubsub.iam.gserviceaccount.com
+roles/eventarc.eventReceiver
+storage object admin
+storage bucket create
+biqquery admin\user - write access
+vertex ai
+
+
+gcloud compute os-login ssh-keys add --key="$(ssh-add -L | grep publickey)" --project=gpeg-externalization-platform
+
+ssh -i ~/.ssh/google_compute_engine jaswantj_google_com@aef-ldap--auth--test-20240103t090100-zql7.asia-southeast1-a.gpeg-externalization-platform
+
+ssh -i ~/.ssh/google_compute_engine jaswantj_google_com@instance-1.asia-southeast1-b.gpeg-externalization-platform
+
+ssh jaswantj_google_com@nic0.instance-1.asia-southeast1-b.c.gpeg-externalization-platform.internal.gcpnode.com
+
+
+
+curl -H 'Content-Type: application/json' \
+    -d '{"message":{"data": "Jaswant="}}' \
+    -X POST \
+    http://127.0.0.1:8000/
+
+
+gcloud pubsub subscriptions create cloudtestsub --topic run-test \
+--ack-deadline=600 \
+--push-endpoint=https://cloudrun-test-abuwvk2glq-as.a.run.app/ \
+--push-auth-service-account=smartaitool-dev@gpeg-externalization-platform.iam.gserviceaccount.com
+
+gcloud projects add-iam-policy-binding gpeg-externalization-platform \
+   --member=serviceAccount:service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com \
+   --role=roles/iam.serviceAccountTokenCreator
+
+
+Providing roles for GCP pub / sub
+------------------------------------
+gcloud run services add-iam-policy-binding cloudrun-test \
+   --member=serviceAccount:cloudrun-test@gpeg-externalization-platform.iam.gserviceaccount.com \
+   --role=roles/run.invoker
+
+gcloud projects add-iam-policy-binding gpeg-externalization-platform \
+   --member=serviceAccount:service-81825140663@gcp-sa-pubsub.iam.gserviceaccount.com \
+   --role=roles/iam.serviceAccountTokenCreator
+
+
+Torch model archiver
+----------------------
+
+torch-model-archiver -f \
+  --model-name=model \
+  --version=1.0 \
+  --serialized-file=model/key_model/model.safetensors \
+  --handler=handler.py \
+  --extra-files="model/key_model/config.json" \
+  --export-path=archived_model
